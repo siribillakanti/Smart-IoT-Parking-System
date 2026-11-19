@@ -1,0 +1,8 @@
+.DS_Store
+*.log
+*.tmp
+.vscode/
+.idea/
+arduino_secrets.h
+.env
+.env.*
