@@ -1,172 +1,325 @@
 # Smart IoT-Based Parking System
 
-An Arduino-based smart parking prototype that monitors six parking bays using infrared (IR) sensors, displays occupancy information on a 16×2 I2C LCD, identifies the next available bay, and controls an entrance barrier using a servo motor.
+An Arduino-based automated parking management prototype designed to monitor parking-space availability, identify vacant slots, and control vehicle entry through an intelligent gate mechanism.
 
-> **Project status:** Physical prototype and Arduino implementation documented. The current implementation uses local sensor inputs and local display/servo control; cloud connectivity, remote monitoring, reservations, and payments are future enhancements, not implemented features.
+\<p align="center">   \<img src="assets/prototype/prototype-overview-1.png" width="85%" alt="Smart IoT Parking System physical prototype"> \</p>
 
-## Project at a glance
+\<p align="center">   \<strong>Automated Parking · IR-Based Detection · Real-Time Monitoring · Servo-Controlled Gate\</strong> \</p>
 
-- **Controller:** Arduino Uno
-- **Parking capacity:** 6 bays
-- **Parking detection:** 6 IR obstacle sensors
-- **Entrance detection:** 1 IR obstacle sensor
-- **Display:** 16×2 I2C LCD (configured at address `0x27`)
-- **Gate actuator:** Servo motor
-- **Firmware:** Arduino C/C++
-- **Libraries:** `Wire`, `LiquidCrystal_I2C`, and `Servo`
+---
 
-## Physical prototype
+## Overview
 
-The project was assembled as a miniature parking layout with marked parking bays, sensor modules, controller wiring, an LCD, and a servo-operated entrance barrier.
+Finding available parking spaces can be time-consuming, particularly in areas where parking availability is not clearly communicated.
 
-![Physical prototype overview](assets/prototype/prototype-overview-1.png)
+The **Smart IoT-Based Parking System** addresses this problem through a miniature automated parking prototype built using Arduino Uno, infrared sensors, an LCD display, and a servo motor.
 
-More photographs are available in [`assets/prototype/`](assets/prototype/).
+The system monitors six individual parking slots using IR sensors and continuously calculates the number of occupied and available spaces. When a vehicle approaches the entrance, an additional IR sensor detects its presence. If a parking space is available, the system identifies the first vacant slot, displays its number on the LCD, and activates the servo-controlled entrance gate.
 
-## Features implemented in the submitted firmware
+When all six parking spaces are occupied, the system displays a parking-full notification and keeps the entrance gate closed.
 
-1. Reads six parking-slot IR sensors.
-2. Counts occupied and vacant slots.
-3. Finds the first vacant slot in slot-number order.
-4. Displays occupied/vacant counts and the next available slot on the LCD.
-5. Detects a vehicle at the entrance.
-6. If at least one slot is vacant, displays the suggested slot and operates the servo gate.
-7. If all six slots are occupied, displays `PARKING FULL` and commands the gate to remain closed.
-8. Prints entrance and gate events to the Serial Monitor at 9600 baud.
+The project demonstrates the practical application of embedded systems, sensor integration, automation, and hardware–software interaction.
 
-## System architecture
+## Key Features
 
-```text
-6 parking-slot IR sensors ─┐
-                           ├──> Arduino Uno ───> 16×2 I2C LCD
-Entrance IR sensor ────────┘         │
-                                     └──────────> Servo gate
+| Feature                | Description                                                 |
+| ---------------------- | ----------------------------------------------------------- |
+| Six-Slot Monitoring    | Independently monitors six parking spaces using IR sensors. |
+| Vehicle Detection      | Detects vehicles occupying individual parking slots.        |
+| Occupancy Calculation  | Automatically calculates occupied and vacant spaces.        |
+| Slot Identification    | Identifies the first available parking slot.                |
+| LCD Display            | Displays parking availability and slot information.         |
+| Entrance Detection     | Detects vehicles approaching the parking entrance.          |
+| Automatic Gate Control | Operates the entrance barrier using a servo motor.          |
+| Parking-Full Detection | Prevents the gate from opening when all slots are occupied. |
+| Serial Monitoring      | Displays system events through the Arduino Serial Monitor.  |
+
+## Physical Prototype
+
+The system was implemented as a miniature parking-lot model with individually marked parking bays, strategically positioned IR sensors, an Arduino controller, and an automated entrance barrier.
+
+\<p align="center">
+&#x20; \<img src="assets/prototype/prototype-overview-2.png" width="85%" alt="Top view of the smart parking prototype">
+\</p>
+
+\<p align="center">
+&#x20; \<img src="assets/prototype/ir-sensor-and-controller-wiring.png" width="85%" alt="IR sensors installed along the parking bays">
+\</p>
+
+\<p align="center">
+&#x20; \<img src="assets/prototype/prototype-rear-wiring.png" width="85%" alt="Controller and wiring arrangement">
+\</p>
+
+## Hardware Components
+
+| Component                 |    Quantity | Purpose                                          |
+| ------------------------- | ----------: | ------------------------------------------------ |
+| Arduino Uno               |           1 | Central processing and control unit              |
+| IR Obstacle Sensors       |           7 | Six parking-slot sensors and one entrance sensor |
+| 16×2 LCD Display with I2C |           1 | Displays parking information                     |
+| Servo Motor               |           1 | Controls the entrance barrier                    |
+| Jumper Wires              | As required | Hardware connections                             |
+| Power Supply              | As required | Powers the electronic components                 |
+| Physical Model            |           1 | Represents the parking infrastructure            |
+
+## Software and Technologies
+
+- **Programming Language:** Embedded C/C++ (Arduino)
+- **Microcontroller Platform:** Arduino Uno
+- **Development Environment:** Arduino IDE
+- **Sensor Interface:** Digital GPIO
+- **Display Communication:** I2C
+- **Actuator Control:** Servo motor interface
+- **Libraries:** Wire, LiquidCrystal_I2C, Servo
+
+## System Architecture
+
+The Arduino Uno acts as the central controller, receiving information from the parking and entrance sensors and coordinating the LCD display and servo motor.
+
+```mermaid
+flowchart TB
+    A["Parking Slot 1–6<br/>IR Sensors"] --> C["Arduino Uno"]
+    B["Entrance IR Sensor"] --> C
+
+    C --> D["Occupancy Calculation"]
+    D --> E["Available Slot Identification"]
+    E --> F["16×2 LCD Display"]
+    D --> G{"Parking Space<br/>Available?"}
+
+    G -->|Yes| H["Servo Gate Opens"]
+    G -->|No| I["Parking Full<br/>Gate Remains Closed"]
+
+    H --> J["Vehicle Entry"]
 ```
 
-The parking sensors and entrance sensor provide digital inputs to the Arduino. The Arduino calculates availability and drives the LCD and servo outputs.
+## Pin Connections
 
-## Pin connections
+The following table documents the connections defined in the Arduino firmware.
 
-The table below reflects the submitted `.ino` source code. Verify the physical wiring against this mapping before rebuilding the circuit.
+| Component        | Arduino Uno Pin | Purpose                       |
+| ---------------- | --------------- | ----------------------------- |
+| Parking Sensor 1 | D2              | Slot 1 occupancy              |
+| Parking Sensor 2 | D3              | Slot 2 occupancy              |
+| Parking Sensor 3 | D4              | Slot 3 occupancy              |
+| Parking Sensor 4 | D5              | Slot 4 occupancy              |
+| Parking Sensor 5 | D6              | Slot 5 occupancy              |
+| Parking Sensor 6 | D7              | Slot 6 occupancy              |
+| Entrance Sensor  | D8              | Vehicle detection at entrance |
+| Servo Motor      | D9              | Entrance gate control         |
+| LCD SDA          | A4              | I2C data                      |
+| LCD SCL          | A5              | I2C clock                     |
+| LCD VCC          | 5V              | Power supply                  |
+| LCD GND          | GND             | Ground                        |
+| IR Sensor VCC    | 5V              | Power supply                  |
+| IR Sensor GND    | GND             | Ground                        |
 
-| Component | Arduino Uno connection | Purpose |
-|---|---:|---|
-| Parking sensor 1 | D2 | Slot 1 occupancy |
-| Parking sensor 2 | D3 | Slot 2 occupancy |
-| Parking sensor 3 | D4 | Slot 3 occupancy |
-| Parking sensor 4 | D5 | Slot 4 occupancy |
-| Parking sensor 5 | D6 | Slot 5 occupancy |
-| Parking sensor 6 | D7 | Slot 6 occupancy |
-| Entrance sensor | D8 | Detect vehicle at entrance |
-| Servo signal | D9 | Open/close gate |
-| LCD SDA | A4 | I2C data |
-| LCD SCL | A5 | I2C clock |
-| LCD power | 5V and GND | Power |
-| IR sensor power | 5V and GND | Power and common reference |
+**Sensor configuration:** The firmware uses `INPUT_PULLUP` and assumes that a detected vehicle produces a `LOW` signal. Verify the output polarity of the actual IR modules before connecting or modifying the circuit.
 
-The firmware uses `INPUT_PULLUP` and assumes a detected vehicle produces `LOW`. Some IR modules have different output behavior or wiring; check the actual module before changing the `VEHICLE_DETECTED` constant.
+**Power consideration:** The servo motor may require an external regulated supply depending on its specifications. When using a separate supply, connect its ground to Arduino GND.
 
-## Hardware requirements
+## Working Principle
 
-- Arduino Uno
-- 6 IR obstacle sensor modules for parking bays
-- 1 IR obstacle sensor module for entrance detection
-- 16×2 LCD with I2C backpack
-- Servo motor suitable for the model gate
-- Jumper wires and suitable power supply
-- Physical parking-lot base/model and barrier arm
-- USB cable and computer for programming/Serial Monitor
+The system follows a continuous monitoring and decision-making process.
 
-**Power note:** A servo can draw current spikes. Use a suitable regulated supply for the servo when required by its specifications, and connect the supply ground to Arduino ground. Do not assume the Arduino 5V pin can safely power every servo under load.
+**1. System Initialization**
 
-## Software requirements
+The Arduino initializes the IR sensors, LCD display, servo motor, and Serial communication.
 
-- Arduino IDE
-- Arduino AVR Boards support for Arduino Uno
-- `Servo` library (normally included with the Arduino IDE)
-- `LiquidCrystal_I2C` library compatible with the `lcd.init()` API used in the source
+**2. Parking-Slot Monitoring**
 
-`Wire` is part of the Arduino core.
+Each of the six IR sensors is read to determine whether its corresponding parking slot is occupied.
 
-## Build and upload
+**3. Occupancy Calculation**
 
-1. Install the Arduino IDE and Arduino Uno board support.
-2. Install a compatible `LiquidCrystal_I2C` library.
-3. Open [`src/SmartParkingSystem.ino`](src/SmartParkingSystem.ino).
-4. Select **Arduino Uno** and the correct serial port.
-5. Connect the circuit using the pin table above.
-6. Verify/compile, then upload the sketch.
-7. Open Serial Monitor at **9600 baud**.
+The Arduino calculates:
 
-The LCD address is configured as `0x27`. If the display does not initialize, confirm the backpack address and library compatibility.
+- Total occupied parking spaces.
+- Total available parking spaces.
+- First available parking-slot number.
 
-## Operating logic
+**4. LCD Status Update**
 
-1. The Arduino initializes the sensors, servo, Serial connection, and LCD.
-2. It reads each of the six parking sensors and calculates occupied and vacant counts.
-3. It identifies the first vacant slot (lowest slot number) and updates the LCD.
-4. When the entrance sensor detects a vehicle, the firmware checks the available-slot count.
-5. If a slot is available, the LCD shows the suggested slot and the servo is commanded open, then closed after a timed interval.
-6. If no slots are available, the LCD shows `PARKING FULL` and the gate is commanded closed.
+The LCD displays the current parking status, including occupied and vacant counts and the next available slot.
 
-## Demo and supporting material
+**5. Vehicle Detection at Entrance**
 
-- [Physical prototype demonstration video](assets/demo/physical-prototype-demo.mp4)
-- [Project presentation (PDF)](assets/presentation/project-presentation.pdf)
-- [Prototype photographs](assets/prototype/)
-- [Code review and known limitations](docs/code-review.md)
-- [Project documentation](docs/project-documentation.md)
-- [Project report (student ID numbers redacted)](docs/project-report-redacted.pdf)
+A separate IR sensor detects an approaching vehicle.
 
-## Known limitations and review notes
+**6. Availability-Based Decision**
 
-This repository preserves the submitted firmware. It has not been represented as a freshly compiled or hardware-retested build in this repository. Before a future release, review the following:
+- If parking space is available, the LCD displays the suggested slot and the servo motor opens the entrance gate.
+- If all six slots are occupied, the LCD displays `PARKING FULL` and the gate remains closed.
 
-- The entrance logic is level-triggered: if the entrance sensor remains active, the gate sequence can run again after the loop delay. Edge detection or a vehicle-passage state machine would make this more robust.
-- Several `lcd.clear()` calls occur during the loop and can cause visible flicker.
-- The gate uses fixed delays rather than confirming that a vehicle has fully passed.
-- The firmware chooses the first available slot; it does not reserve that slot or confirm that the arriving vehicle parks there.
-- IR sensor range and active output polarity depend on the specific modules and calibration.
-- The source uses `INPUT_PULLUP`; confirm this is appropriate for the sensor modules' digital outputs.
-- The physical wiring should be checked against the source-code pin map. The code is the source of truth for the documented firmware mapping in this repository.
+**7. Gate Operation**
 
-## Future enhancements (not currently implemented)
+After the programmed waiting interval, the servo motor returns the gate to its closed position.
 
-- ESP32/Wi-Fi connectivity and cloud-based occupancy monitoring
-- Web or mobile dashboard
-- Slot reservation and entry/exit tracking
-- Vehicle identification / number-plate recognition
-- Parking analytics and historical occupancy data
-- Non-blocking gate control and entrance debounce/state management
+The process repeats continuously, allowing the system to monitor parking availability.
+
+## Software Implementation
+
+The Arduino firmware is organized around the following functions:
+
+| Function                 | Responsibility                                      |
+| ------------------------ | --------------------------------------------------- |
+| `setup()`                | Initializes hardware, sensors, LCD, and servo       |
+| `loop()`                 | Performs continuous parking monitoring              |
+| `displayParkingStatus()` | Displays occupancy and available-slot information   |
+| `openGate()`             | Activates the entrance barrier                      |
+| `closeGate()`            | Returns the entrance barrier to its closed position |
+
+The firmware uses digital sensor readings, conditional logic, iteration, and servo control to implement the parking-management workflow.
+
+## Getting Started
+
+### Prerequisites
+
+- Arduino IDE installed.
+- Arduino Uno board support.
+- Compatible `LiquidCrystal_I2C` library.
+- Servo library.
+- Required physical hardware components.
+
+### Installation and Execution
+
+**1. Clone the repository**
+
+```bash
+git clone https://github.com/siribillakanti/Smart-IoT-Parking-System.git
+```
+
+**2. Navigate to the project**
+
+```bash
+cd Smart-IoT-Parking-System
+```
+
+**3. Open the Arduino firmware**
+
+Open:
+
+```text
+src/SmartParkingSystem.ino
+```
+
+using Arduino IDE.
+
+**4. Configure the board**
+
+- Select Arduino Uno.
+- Select the appropriate serial port.
+- Verify the sensor and LCD connections.
+
+**5. Install the required library**
+
+Install a compatible `LiquidCrystal_I2C` library if it is not already available.
+
+**6. Compile and upload**
+
+Verify the sketch and upload it to the Arduino Uno.
+
+**7. Monitor system output**
+
+Open the Serial Monitor and configure the baud rate to `9600`.
+
+The LCD is configured with I2C address `0x27`. Verify the address of your LCD module if it does not initialize.
+
+## Project Demonstration
+
+A physical demonstration of the prototype is included below.
+
+\<p align="center">
+&#x20; \<a href="assets/demo/physical-prototype-demo.mp4">
+&#x20;   \<img src="assets/demo/demo-frame.jpg" width="85%" alt="Smart parking system demonstration video preview">
+&#x20; \</a>
+\</p>
+
+\<p align="center">
+&#x20; \<strong>\<a href="assets/demo/physical-prototype-demo.mp4">▶ Watch Project Demonstration\</a>\</strong>
+\</p>
+
+## Project Documentation
+
+The repository includes additional project materials:
+
+| Resource                                                             | Description                                                          |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| [Project Presentation](assets/presentation/project-presentation.pdf) | Project explanation and presentation slides                          |
+| [Project Report](docs/project-report-redacted.pdf)                   | Academic project report with student identification numbers redacted |
+| [Project Documentation](docs/project-documentation.md)               | Technical project documentation                                      |
+| [Code Review](docs/code-review.md)                                   | Firmware review and implementation notes                             |
+| [Prototype Images](assets/prototype/)                                | Physical implementation photographs                                  |
+
+## Technical Scope
+
+The current prototype demonstrates local sensor-based parking detection, occupancy calculation, LCD-based status reporting, and automated entrance-barrier control.
+
+The system is designed around a modular hardware architecture, providing opportunities for future integration with network-connected controllers and remote monitoring platforms.
+
+Potential development directions include:
+
+- ESP32-based wireless connectivity.
+- Cloud-based parking occupancy monitoring.
+- Web-based parking management dashboard.
+- Mobile application integration.
+- Parking reservation and entry/exit tracking.
+- Historical parking-usage analytics.
+- Improved vehicle-passage detection and non-blocking gate control.
+
+These are proposed extensions rather than features of the current implementation.
+
+## Repository Structure
+
+```text
+Smart-IoT-Parking-System/
+│
+├── src/
+│   └── SmartParkingSystem.ino
+│
+├── docs/
+│   ├── code-review.md
+│   ├── project-documentation.md
+│   └── project-report-redacted.pdf
+│
+├── assets/
+│   ├── demo/
+│   │   ├── demo-frame.jpg
+│   │   └── physical-prototype-demo.mp4
+│   │
+│   ├── presentation/
+│   │   └── project-presentation.pdf
+│   │
+│   └── prototype/
+│       ├── prototype-overview-1.png
+│       ├── prototype-overview-2.png
+│       ├── ir-sensor-and-controller-wiring.png
+│       └── prototype-rear-wiring.png
+│
+├── README.md
+├── CONTRIBUTING.md
+├── NOTICE.md
+└── .gitignore
+```
 
 ## Team
 
-Academic group project developed by:
+This project was developed as an academic group project by:
 
-- Billakanti Siri
+- **Billakanti Siri**
 - K. Bhavana
 - M. Geethika
 - Nuguri Siri
 
-Koneru Lakshmaiah University — B.Tech, II Year, AY 2026–27.
-
-## Repository contents
-
-```text
-Smart-IoT-Parking-System/
-├── src/
-│   └── SmartParkingSystem.ino
-├── docs/
-│   ├── code-review.md
-│   └── project-documentation.md
-├── assets/
-│   ├── demo/
-│   ├── presentation/
-│   └── prototype/
-├── README.md
-└── .gitignore
-```
+**Institution:** Koneru Lakshmaiah University (KLU)
+**Program:** B.Tech – Computer Science and Engineering
+**Academic Year:** 2026–2027
 
 ---
 
-**Note:** This is an educational physical prototype. The repository distinguishes the functionality present in the submitted firmware from proposed future IoT/cloud features.
+\<p align="center">
+&#x20; \<strong>Smart IoT-Based Parking System\</strong>
+&#x20; \<br>
+&#x20; Embedded Systems · Sensor Integration · Automation
+&#x20; \<br>\<br>
+&#x20; Built with Arduino Uno and IR-based sensing.
+\</p>
